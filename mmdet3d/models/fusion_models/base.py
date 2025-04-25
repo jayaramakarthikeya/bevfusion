@@ -48,7 +48,7 @@ class Base3DFusionModel(BaseModule, metaclass=ABCMeta):
 
         return loss, log_vars
 
-    def train_step(self, data, iter, optimizer):
+    def train_step(self, data, optimizer):
         """The iteration step during training.
 
         This method defines an iteration step during training, except for the
@@ -75,7 +75,7 @@ class Base3DFusionModel(BaseModule, metaclass=ABCMeta):
                 DDP, it means the batch size on each GPU), which is used for \
                 averaging the logs.
         """
-        data["iter"] = iter
+        #data["iter"] = iter
         losses = self(**data)
         loss, log_vars = self._parse_losses(losses)
 
@@ -83,14 +83,14 @@ class Base3DFusionModel(BaseModule, metaclass=ABCMeta):
 
         return outputs
 
-    def val_step(self, data, iter, optimizer):
+    def val_step(self, data, optimizer):
         """The iteration step during validation.
 
         This method shares the same signature as :func:`train_step`, but used
         during val epochs. Note that the evaluation after training epochs is
         not implemented with this method, but an evaluation hook.
         """
-        data["iter"] = iter
+        #data["iter"] = iter
         outputs = self(**data)
         #loss, log_vars = self._parse_losses(losses)
 

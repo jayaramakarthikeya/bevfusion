@@ -92,7 +92,7 @@ class BEVFusion(Base3DFusionModel):
                 if heads[name] is not None:
                     self.loss_scale[name] = 1.0
 
-        self.summary_writer = SummaryWriter(log_dir="/home/bevfusion/tf_logs")
+        #self.summary_writer = SummaryWriter(log_dir="/home/bevfusion/tf_logs")
         self.object_classes = [
             "car",
             "truck",
@@ -192,7 +192,6 @@ class BEVFusion(Base3DFusionModel):
     @auto_fp16(apply_to=("img", "points"))
     def forward(
         self,
-        iter,
         img,
         points,
         camera2ego,
@@ -217,7 +216,6 @@ class BEVFusion(Base3DFusionModel):
             raise NotImplementedError
         else:
             outputs = self.forward_single(
-                iter,
                 img,
                 points,
                 camera2ego,
@@ -240,176 +238,175 @@ class BEVFusion(Base3DFusionModel):
             )
             return outputs
         
-    def visualize_camera(
-        self,
-        image: np.ndarray,
-        *,
-        bboxes: Optional[LiDARInstance3DBoxes] = None,
-        labels: Optional[np.ndarray] = None,
-        transform: Optional[np.ndarray] = None,
-        classes: Optional[List[str]] = None,
-        color: Optional[Tuple[int, int, int]] = None,
-        thickness: float = 4,
-        index_cam: int 
-    ) -> None:
-        canvas = image.copy()
-        canvas = cv2.cvtColor(canvas, cv2.COLOR_RGB2BGR)
+    # def visualize_camera(
+    #     self,
+    #     image: np.ndarray,
+    #     *,
+    #     bboxes: Optional[LiDARInstance3DBoxes] = None,
+    #     labels: Optional[np.ndarray] = None,
+    #     transform: Optional[np.ndarray] = None,
+    #     classes: Optional[List[str]] = None,
+    #     color: Optional[Tuple[int, int, int]] = None,
+    #     thickness: float = 4,
+    #     index_cam: int 
+    # ) -> None:
+    #     canvas = image.copy()
+    #     canvas = cv2.cvtColor(canvas, cv2.COLOR_RGB2BGR)
 
        
-        PALETTE = OBJECT_PALETTE
+    #     PALETTE = OBJECT_PALETTE
 
-        if bboxes is not None and len(bboxes) > 0:
-            corners = bboxes.corners
-            num_bboxes = corners.shape[0]
+    #     if bboxes is not None and len(bboxes) > 0:
+    #         corners = bboxes.corners
+    #         num_bboxes = corners.shape[0]
 
-            coords = np.concatenate(
-                [corners.reshape(-1, 3), np.ones((num_bboxes * 8, 1))], axis=-1
-            )
-            transform = copy.deepcopy(transform).reshape(4, 4)
-            coords = coords @ transform.T
-            coords = coords.reshape(-1, 8, 4)
+    #         coords = np.concatenate(
+    #             [corners.reshape(-1, 3), np.ones((num_bboxes * 8, 1))], axis=-1
+    #         )
+    #         transform = copy.deepcopy(transform).reshape(4, 4)
+    #         coords = coords @ transform.T
+    #         coords = coords.reshape(-1, 8, 4)
 
-            indices = np.all(coords[..., 2] > 0, axis=1)
-            coords = coords[indices]
-            labels = labels[indices]
+    #         indices = np.all(coords[..., 2] > 0, axis=1)
+    #         coords = coords[indices]
+    #         labels = labels[indices]
 
-            indices = np.argsort(-np.min(coords[..., 2], axis=1))
-            coords = coords[indices]
-            labels = labels[indices]
+    #         indices = np.argsort(-np.min(coords[..., 2], axis=1))
+    #         coords = coords[indices]
+    #         labels = labels[indices]
 
-            coords = coords.reshape(-1, 4)
-            coords[:, 2] = np.clip(coords[:, 2], a_min=1e-5, a_max=1e5)
-            coords[:, 0] /= coords[:, 2]
-            coords[:, 1] /= coords[:, 2]
+    #         coords = coords.reshape(-1, 4)
+    #         coords[:, 2] = np.clip(coords[:, 2], a_min=1e-5, a_max=1e5)
+    #         coords[:, 0] /= coords[:, 2]
+    #         coords[:, 1] /= coords[:, 2]
 
-            coords = coords[..., :2].reshape(-1, 8, 2)
-            for index in range(coords.shape[0]):
-                name = classes[labels[index]]
-                for start, end in [
-                    (0, 1),
-                    (0, 3),
-                    (0, 4),
-                    (1, 2),
-                    (1, 5),
-                    (3, 2),
-                    (3, 7),
-                    (4, 5),
-                    (4, 7),
-                    (2, 6),
-                    (5, 6),
-                    (6, 7),
-                ]:
-                    cv2.line(
-                        canvas,
-                        coords[index, start].astype(np.int),
-                        coords[index, end].astype(np.int),
-                        color or PALETTE[name],
-                        thickness,
-                        cv2.LINE_AA,
-                    )
-            canvas = canvas.astype(np.uint8)
-        canvas = cv2.cvtColor(canvas, cv2.COLOR_BGR2RGB)
+    #         coords = coords[..., :2].reshape(-1, 8, 2)
+    #         for index in range(coords.shape[0]):
+    #             name = classes[labels[index]]
+    #             for start, end in [
+    #                 (0, 1),
+    #                 (0, 3),
+    #                 (0, 4),
+    #                 (1, 2),
+    #                 (1, 5),
+    #                 (3, 2),
+    #                 (3, 7),
+    #                 (4, 5),
+    #                 (4, 7),
+    #                 (2, 6),
+    #                 (5, 6),
+    #                 (6, 7),
+    #             ]:
+    #                 cv2.line(
+    #                     canvas,
+    #                     coords[index, start].astype(np.int),
+    #                     coords[index, end].astype(np.int),
+    #                     color or PALETTE[name],
+    #                     thickness,
+    #                     cv2.LINE_AA,
+    #                 )
+    #         canvas = canvas.astype(np.uint8)
+    #     canvas = cv2.cvtColor(canvas, cv2.COLOR_BGR2RGB)
 
-        self.summary_writer.add_image(
-            f"train/sample_rgb_hwc_{index_cam}",
-            canvas,                    # still a NumPy H×W×C array (uint8 or float)
-            global_step=0,
-            dataformats="HWC"
-        )
+    #     self.summary_writer.add_image(
+    #         f"train/sample_rgb_hwc_{index_cam}",
+    #         canvas,                    # still a NumPy H×W×C array (uint8 or float)
+    #         global_step=0,
+    #         dataformats="HWC"
+    #     )
 
-        #self.summary_writer.flush()
+    #     #self.summary_writer.flush()
 
 
-    def visualize_lidar(
-        self,
-        lidar: Optional[np.ndarray] = None,
-        *,
-        bboxes: Optional[LiDARInstance3DBoxes] = None,
-        labels: Optional[np.ndarray] = None,
-        classes: Optional[List[str]] = None,
-        xlim: Tuple[float, float] = (-50, 50),
-        ylim: Tuple[float, float] = (-50, 50),
-        color: Optional[Tuple[int, int, int]] = None,
-        radius: float = 15,
-        thickness: float = 2
-    ) -> None:
-        """
-        Logs a top‐down LiDAR + 3D-box plot into TensorBoard.
+    # def visualize_lidar(
+    #     self,
+    #     lidar: Optional[np.ndarray] = None,
+    #     *,
+    #     bboxes: Optional[LiDARInstance3DBoxes] = None,
+    #     labels: Optional[np.ndarray] = None,
+    #     classes: Optional[List[str]] = None,
+    #     xlim: Tuple[float, float] = (-50, 50),
+    #     ylim: Tuple[float, float] = (-50, 50),
+    #     color: Optional[Tuple[int, int, int]] = None,
+    #     radius: float = 15,
+    #     thickness: float = 2
+    # ) -> None:
+    #     """
+    #     Logs a top‐down LiDAR + 3D-box plot into TensorBoard.
         
-        Args:
-            writer:       an initialized torch.utils.tensorboard.SummaryWriter
-            tag:          the name under which to log this figure
-            global_step:  the step index for TensorBoard
-            lidar:        (N,3) point cloud
-            bboxes:       LiDARInstance3DBoxes
-            labels:       (M,) integer class indices
-            classes:      list mapping label → class name
-            xlim, ylim:   plot extents
-            color:        override color for all boxes (RGB tuple 0–255)
-            radius:       point‐size for scatter
-            thickness:    line width for boxes
-            mode:         if contains "simbev" picks alternate palette
-        """
-        # 1) build the figure
-        fig = plt.figure(figsize=(xlim[1] - xlim[0], ylim[1] - ylim[0]))
+    #     Args:
+    #         writer:       an initialized torch.utils.tensorboard.SummaryWriter
+    #         tag:          the name under which to log this figure
+    #         global_step:  the step index for TensorBoard
+    #         lidar:        (N,3) point cloud
+    #         bboxes:       LiDARInstance3DBoxes
+    #         labels:       (M,) integer class indices
+    #         classes:      list mapping label → class name
+    #         xlim, ylim:   plot extents
+    #         color:        override color for all boxes (RGB tuple 0–255)
+    #         radius:       point‐size for scatter
+    #         thickness:    line width for boxes
+    #         mode:         if contains "simbev" picks alternate palette
+    #     """
+    #     # 1) build the figure
+    #     fig = plt.figure(figsize=(xlim[1] - xlim[0], ylim[1] - ylim[0]))
 
-        ax = fig.gca()
-        ax.set_xlim(*xlim)
-        ax.set_ylim(*ylim)
-        ax.set_aspect(1)
-        ax.axis("off")
+    #     ax = fig.gca()
+    #     ax.set_xlim(*xlim)
+    #     ax.set_ylim(*ylim)
+    #     ax.set_aspect(1)
+    #     ax.axis("off")
         
 
-        PALETTE = OBJECT_PALETTE
+    #     PALETTE = OBJECT_PALETTE
 
-        # 2) plot points
-        if lidar is not None:
-            ax.scatter(
-                lidar[:, 0], lidar[:, 1],
-                s=radius, c="white"
-            )
+    #     # 2) plot points
+    #     if lidar is not None:
+    #         ax.scatter(
+    #             lidar[:, 0], lidar[:, 1],
+    #             s=radius, c="white"
+    #         )
 
-        # 3) plot boxes
-        if bboxes is not None and len(bboxes) > 0:
-            # corner ordering: front-left, front-right, back-right, back-left, repeat front-left
-            coords = bboxes.corners[:, [0,3,7,4,0], :2]
-            for index in range(coords.shape[0]):
-                name = classes[labels[index]]
-                plt.plot(
-                    coords[index, :, 0],
-                    coords[index, :, 1],
-                    linewidth=thickness,
-                    color=np.array(color or PALETTE[name]) / 255,
-                )
+    #     # 3) plot boxes
+    #     if bboxes is not None and len(bboxes) > 0:
+    #         # corner ordering: front-left, front-right, back-right, back-left, repeat front-left
+    #         coords = bboxes.corners[:, [0,3,7,4,0], :2]
+    #         for index in range(coords.shape[0]):
+    #             name = classes[labels[index]]
+    #             plt.plot(
+    #                 coords[index, :, 0],
+    #                 coords[index, :, 1],
+    #                 linewidth=thickness,
+    #                 color=np.array(color or PALETTE[name]) / 255,
+    #             )
 
-        buf = io.BytesIO()
-        plt.savefig(
-            buf,                 # Save to the buffer object
-            dpi=10,              # Low DPI as in your example (will look pixelated)
-            facecolor="black",   # Background color of the figure *outside* the axes
-            format="png",        # Explicitly set format
-            bbox_inches="tight", # Adjust bounding box
-            pad_inches=0         # Padding around the bounding box
-        )
-        buf.seek(0)
+    #     buf = io.BytesIO()
+    #     plt.savefig(
+    #         buf,                 # Save to the buffer object
+    #         dpi=10,              # Low DPI as in your example (will look pixelated)
+    #         facecolor="black",   # Background color of the figure *outside* the axes
+    #         format="png",        # Explicitly set format
+    #         bbox_inches="tight", # Adjust bounding box
+    #         pad_inches=0         # Padding around the bounding box
+    #     )
+    #     buf.seek(0)
 
-        img = Image.open(buf)
-        # Convert the PIL image to a NumPy array
-        img_array = np.array(img)
+    #     img = Image.open(buf)
+    #     # Convert the PIL image to a NumPy array
+    #     img_array = np.array(img)
 
-        if img_array.shape[2] == 4: # Check if it has 4 channels (RGBA)
-            img_array = img_array[:, :, :3]
-        # 4) log to TensorBoard
-        self.summary_writer.add_image("train/sample_lidar", img_array,global_step=0, dataformats='HWC')
-        buf.close()
-        #self.summary_writer.flush()
-        plt.close(fig)
+    #     if img_array.shape[2] == 4: # Check if it has 4 channels (RGBA)
+    #         img_array = img_array[:, :, :3]
+    #     # 4) log to TensorBoard
+    #     self.summary_writer.add_image("train/sample_lidar", img_array,global_step=0, dataformats='HWC')
+    #     buf.close()
+    #     #self.summary_writer.flush()
+    #     plt.close(fig)
 
 
     @auto_fp16(apply_to=("img", "points"))
     def forward_single(
         self,
-        iter,
         img,
         points,
         camera2ego,
@@ -503,41 +500,41 @@ class BEVFusion(Base3DFusionModel):
                                 "gt_labels_3d": gt_labels_3d[0].cpu()
                             }
                         )
-                    if iter % 50 == 0:
-                        bboxes_viz = outputs[0]["boxes_3d"].tensor.numpy()
-                        scores_viz = outputs[0]["scores_3d"].numpy()
-                        labels_viz = outputs[0]["labels_3d"].numpy()
+                    # if iter % 50 == 0:
+                    #     bboxes_viz = outputs[0]["boxes_3d"].tensor.numpy()
+                    #     scores_viz = outputs[0]["scores_3d"].numpy()
+                    #     labels_viz = outputs[0]["labels_3d"].numpy()
 
-                        indices = scores_viz >= 0.1
-                        bboxes_viz = bboxes_viz[indices]
-                        scores_viz = scores_viz[indices]
-                        labels_viz = labels_viz[indices]
+                    #     indices = scores_viz >= 0.1
+                    #     bboxes_viz = bboxes_viz[indices]
+                    #     scores_viz = scores_viz[indices]
+                    #     labels_viz = labels_viz[indices]
 
-                        bboxes_viz[..., 2] -= bboxes_viz[..., 5] / 2
-                        bboxes_viz = LiDARInstance3DBoxes(bboxes_viz, box_dim=9)
-                        #img_viz = img[0]
-                        for k, image_path in enumerate(metas[0]["filename"]):
-                            image = mmcv.imread(image_path)
-                            self.visualize_camera(
-                                image,
-                                bboxes=bboxes_viz,
-                                labels=labels_viz,
-                                transform=metas[0]["lidar2image"][k],
-                                classes=self.object_classes,
-                                thickness = 2,
-                                index_cam = k
-                            )
+                    #     bboxes_viz[..., 2] -= bboxes_viz[..., 5] / 2
+                    #     bboxes_viz = LiDARInstance3DBoxes(bboxes_viz, box_dim=9)
+                    #     #img_viz = img[0]
+                    #     for k, image_path in enumerate(metas[0]["filename"]):
+                    #         image = mmcv.imread(image_path)
+                    #         self.visualize_camera(
+                    #             image,
+                    #             bboxes=bboxes_viz,
+                    #             labels=labels_viz,
+                    #             transform=metas[0]["lidar2image"][k],
+                    #             classes=self.object_classes,
+                    #             thickness = 2,
+                    #             index_cam = k
+                    #         )
 
-                        lidar_viz = points[0].cpu().numpy()
-                        self.visualize_lidar(
-                            lidar_viz,
-                            bboxes=bboxes_viz,
-                            labels=labels_viz,
-                            xlim=[self.point_cloud_range[d] for d in [0, 3]],
-                            ylim=[self.point_cloud_range[d] for d in [1, 4]],
-                            classes=self.object_classes,
-                            thickness = 12
-                        )
+                    #     lidar_viz = points[0].cpu().numpy()
+                    #     self.visualize_lidar(
+                    #         lidar_viz,
+                    #         bboxes=bboxes_viz,
+                    #         labels=labels_viz,
+                    #         xlim=[self.point_cloud_range[d] for d in [0, 3]],
+                    #         ylim=[self.point_cloud_range[d] for d in [1, 4]],
+                    #         classes=self.object_classes,
+                    #         thickness = 12
+                    #     )
                     
                 elif type == "map":
                     logits = head(x)
