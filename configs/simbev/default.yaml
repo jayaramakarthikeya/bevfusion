@@ -1,0 +1,291 @@
+dataset_type: SimBEVDataset
+dataset_root: /dataset/simbev/
+
+num_sweeps: 9
+time_step: 0.05
+trim_step: 1
+
+point_cloud_range: [-51.2, -51.2, -5.0, 51.2, 51.2, 3.0]
+voxel_size: [0.1, 0.1, 0.2]
+image_size: [256, 704]
+
+augment2d:
+  resize: [[0.38, 0.55], [0.48, 0.48]]
+  rotate: [-5.4, 5.4]
+  gridmask:
+    prob: 0.0
+    fixed_prob: true
+
+augment3d:
+  scale: [0.96, 1.04]
+  rotate: [-0.78539816, 0.78539816]
+  translate: 0.4
+
+object_classes:
+  - pedestrian
+  - car
+  - truck
+  - bus
+  - motorcycle
+  - bicycle
+
+map_classes:
+  - road
+  - car
+  - truck
+  - bus
+  - motorcycle
+  - bicycle
+  - rider
+  - pedestrian
+
+alt_map_classes:
+  - road
+  - car
+  - truck
+  - cyclist
+  - pedestrian
+
+input_modality:
+  use_lidar: true
+  use_camera: true
+
+train_pipeline:
+  -
+    type: LoadMultiViewImageFromFiles
+    to_float32: true
+  -
+    type: LoadSimBEVPointsFromFile
+    coord_type: LIDAR
+    trim_step: ${trim_step}
+  -
+    type: LoadSimBEVPointsFromMultiSweeps
+    num_sweeps: ${num_sweeps}
+    time_step: ${time_step}
+    trim_step: ${trim_step}
+    is_train: true
+  -
+    type: LoadAnnotations3D
+    with_bbox_3d: true
+    with_label_3d: true
+    with_attr_label: False
+  -
+    type: ImageAug3D
+    final_dim: ${image_size}
+    resize_lim: ${augment2d.resize[0]}
+    bot_pct_lim: [0.0, 0.0]
+    rot_lim: ${augment2d.rotate}
+    rand_flip: true
+    is_train: true
+  -
+    type: GlobalSimBEVRotScaleTrans
+    resize_lim: ${augment3d.scale}
+    rot_lim: ${augment3d.rotate}
+    trans_lim: ${augment3d.translate}
+    is_train: true
+  -
+    type: LoadSimBEVBEVSegmentation
+    is_train: true
+    bev_res_x: 0.4
+    bev_dim_x: 256
+  -
+    type: RandomFlip3D
+  -
+    type: PointsRangeFilter
+    point_cloud_range: ${point_cloud_range}
+  -
+    type: ObjectRangeFilter
+    point_cloud_range: ${point_cloud_range}
+  -
+    type: ObjectNameFilter
+    classes: ${object_classes}
+  -
+    type: ImageNormalize
+    mean: [0.485, 0.456, 0.406]
+    std: [0.229, 0.224, 0.225]
+  - 
+    type: GridMask
+    use_h: true
+    use_w: true
+    max_epoch: ${max_epochs}
+    rotate: 1
+    offset: false
+    ratio: 0.5
+    mode: 1
+    prob: ${augment2d.gridmask.prob}
+    fixed_prob: ${augment2d.gridmask.fixed_prob}
+  -
+    type: PointShuffle
+  -
+    type: DefaultFormatBundle3D
+    classes: ${object_classes}
+  -
+    type: Collect3D
+    keys:
+      - img
+      - points
+      - gt_bboxes_3d
+      - gt_labels_3d
+      - gt_masks_bev
+    meta_keys:
+      - camera_intrinsics
+      - camera2ego
+      - lidar2ego
+      - lidar2camera
+      - camera2lidar
+      - lidar2image
+      - img_aug_matrix
+      - lidar_aug_matrix
+
+test_pipeline:
+  -
+    type: LoadMultiViewImageFromFiles
+    to_float32: true
+  -
+    type: LoadSimBEVPointsFromFile
+    coord_type: LIDAR
+    trim_step: ${trim_step}
+  -
+    type: LoadSimBEVPointsFromMultiSweeps
+    num_sweeps: ${num_sweeps}
+    time_step: ${time_step}
+    trim_step: ${trim_step}
+    is_train: false
+  -
+    type: LoadAnnotations3D
+    with_bbox_3d: true
+    with_label_3d: true
+    with_attr_label: False
+  -
+    type: ImageAug3D
+    final_dim: ${image_size}
+    resize_lim: ${augment2d.resize[1]}
+    bot_pct_lim: [0.0, 0.0]
+    rot_lim: [0.0, 0.0]
+    rand_flip: false
+    is_train: false
+  -
+    type: GlobalSimBEVRotScaleTrans
+    resize_lim: [1.0, 1.0]
+    rot_lim: [0.0, 0.0]
+    trans_lim: 0.0
+    is_train: false
+  -
+    type: LoadSimBEVBEVSegmentation
+    is_train: false
+    bev_res_x: 0.4
+    bev_dim_x: 256
+  -
+    type: PointsRangeFilter
+    point_cloud_range: ${point_cloud_range}
+  -
+    type: ImageNormalize
+    mean: [0.485, 0.456, 0.406]
+    std: [0.229, 0.224, 0.225]
+  -
+    type: DefaultFormatBundle3D
+    classes: ${object_classes}
+  -
+    type: Collect3D
+    keys:
+      - img
+      - points
+      - gt_bboxes_3d
+      - gt_labels_3d
+      - gt_masks_bev
+    meta_keys:
+      - camera_intrinsics
+      - camera2ego
+      - lidar2ego
+      - lidar2camera
+      - camera2lidar
+      - lidar2image
+      - img_aug_matrix
+      - lidar_aug_matrix
+
+pcmf_pipeline:
+  -
+    type: ImageAug3D
+    final_dim: ${image_size}
+    resize_lim: ${augment2d.resize[1]}
+    bot_pct_lim: [0.0, 0.0]
+    rot_lim: [0.0, 0.0]
+    rand_flip: false
+    is_train: false
+  -
+    type: GlobalSimBEVRotScaleTrans
+    resize_lim: [1.0, 1.0]
+    rot_lim: [0.0, 0.0]
+    trans_lim: 0.0
+    is_train: false
+  -
+    type: PointsRangeFilter
+    point_cloud_range: ${point_cloud_range}
+  -
+    type: ImageNormalize
+    mean: [0.485, 0.456, 0.406]
+    std: [0.229, 0.224, 0.225]
+  -
+    type: DefaultFormatBundle3D
+    classes: ${object_classes}
+    with_gt: false
+    with_label: false
+  -
+    type: Collect3D
+    keys:
+      - img
+      - points
+    meta_keys:
+      - camera_intrinsics
+      - camera2ego
+      - lidar2ego
+      - lidar2camera
+      - camera2lidar
+      - lidar2image
+      - img_aug_matrix
+      - lidar_aug_matrix
+
+data:
+  samples_per_gpu: 8
+  workers_per_gpu: 4
+  train:
+    type: CBGSDataset
+    dataset:
+      type: ${dataset_type}
+      dataset_root: ${dataset_root}
+      ann_file: ${dataset_root + "infos/simbev_infos_train.json"}
+      object_classes: ${object_classes}
+      map_classes: ${map_classes}
+      pipeline: ${train_pipeline}
+      modality: ${input_modality}
+      test_mode: false
+      use_valid_flag: true
+      box_type_3d: LiDAR
+      det_eval_mode: distance
+  val:
+    type: ${dataset_type}
+    dataset_root: ${dataset_root}
+    ann_file: ${dataset_root + "infos/simbev_infos_val.json"}
+    object_classes: ${object_classes}
+    map_classes: ${map_classes}
+    pipeline: ${test_pipeline}
+    modality: ${input_modality}
+    test_mode: false
+    box_type_3d: LiDAR
+    det_eval_mode: distance
+  test:
+    type: ${dataset_type}
+    dataset_root: ${dataset_root}
+    ann_file: ${dataset_root + "infos/simbev_infos_val.json"}
+    object_classes: ${object_classes}
+    map_classes: ${map_classes}
+    pipeline: ${test_pipeline}
+    modality: ${input_modality}
+    test_mode: true
+    box_type_3d: LiDAR
+    det_eval_mode: distance
+
+evaluation:
+  interval: 1
+  pipeline: ${test_pipeline}
+ 

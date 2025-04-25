@@ -1,0 +1,33 @@
+seed: 0
+deterministic: false
+
+checkpoint_config:
+  interval: 1
+  by_epoch: true
+  max_keep_ckpts: 5
+  out_dir: /home/bevfusion/checkpoints
+
+log_config:
+  interval: 50
+  hooks:
+    -
+      type: TextLoggerHook
+    -
+      type: TensorboardLoggerHook
+      log_dir: ./tf_logs
+      by_epoch: false
+
+    
+
+load_from: '/home/bevfusion/model/resnet50/bevfusion-det.pth'
+resume_from: null
+
+cudnn_benchmark: false
+fp16:
+  loss_scale: 
+    growth_interval: 2000
+
+max_epochs: 1
+runner:
+  type: CustomEpochBasedRunner
+  max_epochs: ${max_epochs}

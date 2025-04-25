@@ -1,0 +1,101 @@
+// {
+//     "version": "0.2.0",
+//     "configurations": [
+//       {
+//         "name": "Python: Create NuScenes Data",
+//         "type": "debugpy",
+//         "request": "launch",
+//         "program": "${workspaceFolder}/tools/create_data.py",
+//         "args": [
+//           "nuscenes",
+//           "--root-path", "/dataset",
+//           "--out-dir", "/dataset",
+//           "--extra-tag", "nuscenes"
+//         ],
+//         "env": {
+//             "PYTHONPATH": "${workspaceFolder}"
+//         },
+//         "console": "integratedTerminal",
+//         "justMyCode": false
+//       }
+//     ]
+//   }
+
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Train BEVFusion",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/tools/train.py",
+      "args": [
+        "/home/bevfusion/configs/nuscenes/det/transfusion/secfpn/camera+lidar/resnet50/convfuser.yaml"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "MASTER_HOST": "127.0.0.1",
+        "MASTER_PORT": "29500",  
+        "RANK": "0",
+        "WORLD_SIZE": "1"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    }
+  ]
+}
+
+// {
+//   "version": "0.2.0",
+//   "configurations": [
+//     {
+//       "name": "Python: Train BEVFusion",
+//       "type": "debugpy",
+//       "request": "launch",
+//       "program": "${workspaceFolder}/tools/test.py",
+//       "args": [
+//         "/home/bevfusion/configs/nuscenes/det/transfusion/secfpn/camera+lidar/resnet50/convfuser.yaml",
+//         "/home/bevfusion/checkpoints/run-a27fdfff-9fa17f37/latest.pth",
+//         "--eval", "bbox"
+//       ],
+//       "env": {
+//         "PYTHONPATH": "${workspaceFolder}",
+//         "MASTER_HOST": "127.0.0.1",
+//         "MASTER_PORT": "29500",  
+//         "RANK": "0",
+//         "WORLD_SIZE": "1"
+//       },
+//       "console": "integratedTerminal",
+//       "justMyCode": false
+//     }
+//   ]
+// }
+
+// {
+//   "version": "0.2.0",
+//   "configurations": [
+//     {
+//       "name": "Python: Train BEVFusion",
+//       "type": "debugpy",
+//       "request": "launch",
+//       "program": "${workspaceFolder}/tools/visualize.py",
+//       "args": [
+//         "/home/bevfusion/configs/nuscenes/det/transfusion/secfpn/camera+lidar/resnet50/convfuser.yaml",
+//         "--mode", "pred",
+//         "--checkpoint", "/home/bevfusion/checkpoints/run-a27fdfff-9fa17f37/latest.pth",
+//         "--split", "test",
+//         "--bbox-score", "0.1",
+//         "--map-score", "0.5"
+//       ],
+//       "env": {
+//         "PYTHONPATH": "${workspaceFolder}",
+//         "MASTER_HOST": "127.0.0.1",
+//         "MASTER_PORT": "29500",  
+//         "RANK": "0",
+//         "WORLD_SIZE": "1"
+//       },
+//       "console": "integratedTerminal",
+//       "justMyCode": false
+//     }
+//   ]
+// }
