@@ -19,7 +19,7 @@ from mmdet3d.utils import get_root_logger, convert_sync_batchnorm, recursive_eva
 
 
 def main():
-   # dist.init()
+    dist.init()
 
     parser = argparse.ArgumentParser()
     parser.add_argument("config", metavar="FILE", help="config file")
@@ -32,7 +32,7 @@ def main():
     cfg = Config(recursive_eval(configs), filename=args.config)
 
     torch.backends.cudnn.benchmark = cfg.cudnn_benchmark
-    #torch.cuda.set_device(dist.local_rank())
+    torch.cuda.set_device(dist.local_rank())
 
     if args.run_dir is None:
         args.run_dir = auto_set_run_dir()
@@ -64,7 +64,7 @@ def main():
             torch.backends.cudnn.deterministic = True
             torch.backends.cudnn.benchmark = False
 
-    datasets = [build_dataset(cfg.data.train),build_dataset(cfg.data.val)]
+    datasets = [build_dataset(cfg.data.train)]
 
     model = build_model(cfg.model)
     #checkpoint = load_checkpoint(model, '/home/bevfusion/model/resnet50/bevfusion-det.pth', map_location='cpu', strict=False)
@@ -79,7 +79,7 @@ def main():
         model,
         datasets,
         cfg,
-        distributed=False,
+        distributed=True,
         validate=True,
         timestamp=timestamp,
     )

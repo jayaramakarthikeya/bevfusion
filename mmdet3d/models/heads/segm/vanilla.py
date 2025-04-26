@@ -137,7 +137,7 @@ class BEVSegmentationHead(BaseModule):
                 if self.loss == "xent":
                     loss = sigmoid_xent_loss(x[:, index], target[:, index])
                 elif self.loss == "focal":
-                    loss = sigmoid_focal_loss(x[:, index], target[:, index])
+                    loss = 0.5*sigmoid_focal_loss(x[:, index], target[:, index])
                 else:
                     raise ValueError(f"unsupported loss: {self.loss}")
                 losses[f"{name}/{self.loss}"] = loss

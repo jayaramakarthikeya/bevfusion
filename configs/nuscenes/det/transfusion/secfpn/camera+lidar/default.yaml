@@ -65,6 +65,6 @@ model:
 lr_config: null
 
 optimizer:
-  lr: 5.0e-5
+  lr: 2.0e-4
 
-max_epochs: 6
+max_epochs: 1

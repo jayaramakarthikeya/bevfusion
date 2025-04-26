@@ -102,7 +102,7 @@ class ImitationHead(nn.Module):
             gt_waypoints[:,-1,:] = goal_point  
             gt_waypoints = gt_waypoints.to(pred_wp.device)
 
-            losses["waypoint_loss"] = F.l1_loss(pred_wp, gt_waypoints, reduction="mean")
+            losses["waypoint_loss"] = 1.0 * F.l1_loss(pred_wp, gt_waypoints, reduction="mean")
             return losses
         
 

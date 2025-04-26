@@ -71,11 +71,11 @@ model:
         gamma: 2.0
         alpha: 0.25
         reduction: mean
-        loss_weight: 0.25
+        loss_weight: 0.8
       loss_heatmap:
         type: GaussianFocalLoss
         reduction: mean
-        loss_weight: 0.25
+        loss_weight: 0.8
       loss_bbox:
         type: L1Loss
         reduction: mean

@@ -5,16 +5,17 @@ checkpoint_config:
   interval: 1
   by_epoch: true
   max_keep_ckpts: 5
-  out_dir: /home/bevfusion/checkpoints
+  out_dir: /checkpoints
 
 log_config:
   interval: 50
   hooks:
     -
       type: TextLoggerHook
+      
     -
       type: TensorboardLoggerHook
-      log_dir: ./tf_logs
+      log_dir: /logs/tf_logs
       by_epoch: false
 
     

@@ -21,29 +21,29 @@
 //     ]
 //   }
 
-{
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "Python: Train BEVFusion",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/tools/train.py",
-      "args": [
-        "/home/bevfusion/configs/nuscenes/det/transfusion/secfpn/camera+lidar/resnet50/convfuser.yaml"
-      ],
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}",
-        "MASTER_HOST": "127.0.0.1",
-        "MASTER_PORT": "29500",  
-        "RANK": "0",
-        "WORLD_SIZE": "1"
-      },
-      "console": "integratedTerminal",
-      "justMyCode": false
-    }
-  ]
-}
+// {
+//   "version": "0.2.0",
+//   "configurations": [
+//     {
+//       "name": "Python: Train BEVFusion",
+//       "type": "debugpy",
+//       "request": "launch",
+//       "program": "${workspaceFolder}/tools/train.py",
+//       "args": [
+//         "/home/bevfusion/configs/nuscenes/det/transfusion/secfpn/camera+lidar/resnet50/convfuser.yaml"
+//       ],
+//       "env": {
+//         "PYTHONPATH": "${workspaceFolder}",
+//         "MASTER_HOST": "127.0.0.1",
+//         "MASTER_PORT": "29500",  
+//         "RANK": "0",
+//         "WORLD_SIZE": "1"
+//       },
+//       "console": "integratedTerminal",
+//       "justMyCode": false
+//     }
+//   ]
+// }
 
 // {
 //   "version": "0.2.0",
@@ -71,31 +71,55 @@
 //   ]
 // }
 
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Train BEVFusion",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/tools/visualize.py",
+      "args": [
+        "/home/bevfusion/configs/nuscenes/det/transfusion/secfpn/camera+lidar/resnet50/convfuser.yaml",
+        "--mode", "pred",
+        "--checkpoint", "/checkpoints/run-b8ff81a7-2899f95f/latest.pth",
+        "--split", "test",
+        "--bbox-score", "0.1",
+        "--map-score", "0.5",
+        "--out-dir", "/checkpoints/visualize",
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "MASTER_HOST": "127.0.0.1",
+        "MASTER_PORT": "29500",  
+        "RANK": "0",
+        "WORLD_SIZE": "1"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    }
+  ]
+}
+
 // {
 //   "version": "0.2.0",
 //   "configurations": [
-//     {
-//       "name": "Python: Train BEVFusion",
-//       "type": "debugpy",
-//       "request": "launch",
-//       "program": "${workspaceFolder}/tools/visualize.py",
-//       "args": [
-//         "/home/bevfusion/configs/nuscenes/det/transfusion/secfpn/camera+lidar/resnet50/convfuser.yaml",
-//         "--mode", "pred",
-//         "--checkpoint", "/home/bevfusion/checkpoints/run-a27fdfff-9fa17f37/latest.pth",
-//         "--split", "test",
-//         "--bbox-score", "0.1",
-//         "--map-score", "0.5"
-//       ],
-//       "env": {
-//         "PYTHONPATH": "${workspaceFolder}",
-//         "MASTER_HOST": "127.0.0.1",
-//         "MASTER_PORT": "29500",  
-//         "RANK": "0",
-//         "WORLD_SIZE": "1"
-//       },
-//       "console": "integratedTerminal",
-//       "justMyCode": false
-//     }
+//       {
+//           "name": "Train BEVFusion with Torchpack",
+//           "type": "debugpy",
+//           "request": "launch",
+//           "python": "/usr/bin/python3",  // Change this to your correct Python path if different
+//           "program": "/usr/local/bin/torchpack",  // Path to torchpack CLI
+//           "args": [
+//               "dist-run",
+//               "-np", "4",
+//               "python",
+//               "tools/train.py",
+//               "/home/bevfusion/configs/nuscenes/det/transfusion/secfpn/camera+lidar/resnet50/convfuser.yaml"
+//           ],
+//           "console": "integratedTerminal",
+//           "cwd": "${workspaceFolder}",
+//           "justMyCode": false
+//       }
 //   ]
 // }
